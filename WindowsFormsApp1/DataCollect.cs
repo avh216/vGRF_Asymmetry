@@ -14,9 +14,9 @@ namespace WindowsFormsApp1
     {
         System.Timers.Timer timer;
 
-        MccDaq.MccBoard ourboard = new MccDaq.MccBoard(0);
+        MccDaq.MccBoard ourboard = new MccDaq.MccBoard(0); //reading the data acquistion board
 
-        System.UInt16 dataval1, dataval2, dataval3, dataval4, dataval5, dataval6, dataval7, dataval8;
+        System.UInt16 dataval1, dataval2, dataval3, dataval4, dataval5, dataval6, dataval7, dataval8; //places for the raw loadcell values
 
         float engunit1, engunit2, engunit3, engunit4, engunit5, engunit6, engunit7, engunit8;
         float lc_offset1, lc_offset2, lc_offset3, lc_offset4, lc_offset5, lc_offset6, lc_offset7, lc_offset8;
@@ -61,7 +61,7 @@ namespace WindowsFormsApp1
         List<double> PBW_L = new List<double>();
         List<double> PBW_R = new List<double>();
 
-        private void button4_Click(object sender, EventArgs e)
+        private void button4_Click(object sender, EventArgs e) //Loading subject-specific bodyweight
         {
             var body_weight_input = textBox1.Text;
             double mass;
@@ -76,18 +76,18 @@ namespace WindowsFormsApp1
             }
         }
 
-        private void button7_Click(object sender, EventArgs e)
+        private void button7_Click(object sender, EventArgs e) //Adding Subject Number (or Trial name) to output
         {
             SubNo = textBox3.Text;
             textBox3.Clear();
         }
 
-        private void button8_Click(object sender, EventArgs e)
+        private void button8_Click(object sender, EventArgs e) //Recording the amputated limb
         {
             Alimb = textBox2.Text;
             textBox2.Clear();
         }
-        private void button6_Click(object sender, EventArgs e)
+        private void button6_Click(object sender, EventArgs e) // Manually adjust positive range frome pre-set 0.05
         {
             var range_input = textBox4.Text;
             if (double.TryParse(range_input, out range))
@@ -110,8 +110,7 @@ namespace WindowsFormsApp1
 
         public Form1()
         {
-            timer = new System.Timers.Timer(frequency);
-           
+            timer = new System.Timers.Timer(frequency); //Initalising System timer so data collection occurs on each new tick           
             timer.Elapsed += new System.Timers.ElapsedEventHandler(timer_elapsed);
           
             timer.AutoReset = true;
@@ -122,7 +121,7 @@ namespace WindowsFormsApp1
             ourboard.DBitOut(MccDaq.DigitalPortType.AuxPort0, 1, MccDaq.DigitalLogicState.High); // Turning on the rear force plate
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void button1_Click(object sender, EventArgs e) //calculating any offset on the treadmill
         {
             float[] lc_offset_arr1 = new float[sampling_rate];
             float[] lc_offset_arr2 = new float[sampling_rate];
@@ -134,7 +133,7 @@ namespace WindowsFormsApp1
             float[] lc_offset_arr7 = new float[sampling_rate];
             float[] lc_offset_arr8 = new float[sampling_rate];
 
-            for (int ii = 0; ii < sampling_rate; ii++)
+            for (int ii = 0; ii < sampling_rate; ii++)  // collecting 250 samples of data from each load cell
             {
                 ourboard.AIn(0, MccDaq.Range.Bip10Volts, out dataval1);
                 ourboard.ToEngUnits(MccDaq.Range.Bip10Volts, dataval1, out lc_offset_arr1[ii]);
@@ -162,7 +161,7 @@ namespace WindowsFormsApp1
                 ourboard.ToEngUnits(MccDaq.Range.Bip10Volts, dataval8, out lc_offset_arr8[ii]);
             }
 
-            lc_offset1 = lc_offset_arr1.Average();
+            lc_offset1 = lc_offset_arr1.Average(); //Averagint eh offset collected
             lc_offset2 = lc_offset_arr2.Average();
             lc_offset3 = lc_offset_arr3.Average();
             lc_offset4 = lc_offset_arr4.Average();
@@ -172,7 +171,7 @@ namespace WindowsFormsApp1
             lc_offset7 = lc_offset_arr7.Average();
             lc_offset8 = lc_offset_arr8.Average();
 
-            MessageBox.Show("Load cell 1 offset = " + lc_offset1.ToString() +
+            MessageBox.Show("Load cell 1 offset = " + lc_offset1.ToString() + //displaying the offset so any large variations can be spotted.
               "\nLoad cell 2 offset = " + lc_offset2.ToString() +
               "\nLoad cell 3 offset = " + lc_offset3.ToString() +
               "\nLoad cell 4 offset = " + lc_offset4.ToString() +
@@ -183,7 +182,8 @@ namespace WindowsFormsApp1
             
         }
 
-        //Start button
+        //Start button 
+        //Displays errors if required inputs have not been entered.
         private void button2_Click(object sender, EventArgs e)
         {
             if (body_weight == 0)
@@ -216,7 +216,7 @@ namespace WindowsFormsApp1
 
                 counter = 0;
                
-                Form2 f2 = new Form2(body_weight, range, lc_offset1, lc_offset2, lc_offset3, lc_offset4, lc_offset5, lc_offset6, lc_offset7, lc_offset8);
+                Form2 f2 = new Form2(body_weight, range, lc_offset1, lc_offset2, lc_offset3, lc_offset4, lc_offset5, lc_offset6, lc_offset7, lc_offset8);  //sends information to Form 2 for the participant display
                 f2.Show();
 
                chart2.Series["FrontFP"].Points.Clear();
@@ -254,6 +254,7 @@ namespace WindowsFormsApp1
             double force1, force2, force3, force4;
 
             // collecting values from the loadcells
+            //front force plate
             ourboard.AIn(0, MccDaq.Range.Bip10Volts, out dataval1);
             ourboard.ToEngUnits(MccDaq.Range.Bip10Volts, dataval1, out engunit1);
 
@@ -364,7 +365,7 @@ namespace WindowsFormsApp1
 
             }
 
-        //displays on pie charts
+        //displays on pie charts for the user and a line graph to see the moving force 
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (front_fp_list.Count() > 0)
@@ -380,7 +381,7 @@ namespace WindowsFormsApp1
                 chart1.Series["Series1"].Points.AddXY("Right \n" + right_load_percent[right_load_percent.Count - 1].ToString("#.#"), GlobalMaxForceR[GlobalMaxForceR.Count - 1]);
             }
 
-            if (PBW_L.Count > 0 && PBW_R.Count > 0)
+            if (PBW_L.Count > 0 && PBW_R.Count > 0) //displaying thumbs up/down depending on the ratio of the last two steps
             {
                 double PBW_Dif = Math.Abs(PBW_L[PBW_L.Count - 1] - PBW_R[PBW_R.Count - 1]);
 
@@ -400,11 +401,10 @@ namespace WindowsFormsApp1
 
 
         private void button3_Click(object sender, EventArgs e)
-        {
+        { //Stops data collection
             timer.Enabled = false;
             timer1.Stop();
-            
-
+           // Displays the average percent through the duration of the data collection
             MessageBox.Show("Left GRF %: " + left_load_percent.Average().ToString("#.##") + 
                             "\nRight GRF %: " + right_load_percent.Average().ToString("#.##") +
                             "\n Left Force/Bodyweight: " +PBW_L.Average().ToString("#.##") +
@@ -414,7 +414,7 @@ namespace WindowsFormsApp1
         
         private void button5_Click(object sender, EventArgs e)
         {
-             
+             //Outputs collected data in a tab seperate csv.
              int i,LC,RC;
              string filename;
              System.Data.DataTable data = new System.Data.DataTable();
@@ -484,7 +484,7 @@ namespace WindowsFormsApp1
 
              // save the file
              File.WriteAllText(@"E:\Rehab_Minty\" + filename, sb.ToString());
-             Trial = Trial + 1;
+             Trial = Trial + 1; //Each additional data collection run on same session is saved with an incremental number increase.
 
         }
 
