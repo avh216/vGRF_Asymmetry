@@ -12,7 +12,8 @@ namespace WindowsFormsApp1
 {
     public partial class Form2 : Form
     {
-        System.Timers.Timer timer2;
+    //initialising time and DAQ board
+        System.Timers.Timer timer2; 
         MccDaq.MccBoard ourboard = new MccDaq.MccBoard(0);
         System.UInt16 dataval1, dataval2, dataval3, dataval4, dataval5, dataval6, dataval7, dataval8;
         float engunit1, engunit2, engunit3, engunit4, engunit5, engunit6, engunit7, engunit8;
@@ -58,7 +59,7 @@ namespace WindowsFormsApp1
             timer2.Enabled = false;
 
             InitializeComponent();
-
+            //Translating information sent from the Data Collection Form
             bodyweight = body_weight;
             Range = range;
             offset1 = lc_offset1;
@@ -178,7 +179,7 @@ namespace WindowsFormsApp1
                     maxforce_time = front_fp_time_max_force_list[index_max_force_time]; //finds counter of associated peak
                     maxforce = rearforce + frontforcemax;
 
-                    PBW = maxforce / bodyweight;
+                    PBW = maxforce / bodyweight;  //Calculation of %BW. 
 
                     cop_z_arr.Average(); //calculate average COP
 
@@ -228,7 +229,7 @@ namespace WindowsFormsApp1
                 chart1.Series["Series1"].Points.AddXY("Left \n" + left_load_percent[left_load_percent.Count - 1].ToString("#.#"), GlobalMaxForceL[GlobalMaxForceL.Count - 1]);
                 chart1.Series["Series1"].Points.AddXY("Right \n" + right_load_percent[right_load_percent.Count - 1].ToString("#.#"), GlobalMaxForceR[GlobalMaxForceR.Count - 1]);
             }
-
+//Displaying visual feedback with the thumbs up/down depending on the range
             if (PBW_L.Count > 0 && PBW_R.Count > 0)
             {
                 double PBW_Dif = Math.Abs(PBW_L[PBW_L.Count - 1] - PBW_R[PBW_R.Count - 1]);
